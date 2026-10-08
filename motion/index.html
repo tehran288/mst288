@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>رسا استودیو — موشن گرافیک</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@200;300;400;600;800;900&display=block" rel="stylesheet">
+<style>
+/* ============ پالت لاجوردی (Lapis) ============ */
+:root{
+  --lapis-900:#060f2b;
+  --lapis-800:#0a1a45;
+  --lapis-700:#10276a;
+  --lapis-600:#1a3b94;
+  --lapis-500:#2552c4;
+  --lapis-300:#7d9cf0;
+  --gold-500:#d4af37;
+  --gold-300:#f2d27a;
+  --gold-100:#fff1c7;
+  --ink:#eef2ff;
+  --muted:#aab8e6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#03081a;overflow:hidden;font-family:"Vazirmatn",system-ui,sans-serif;color:var(--ink)}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;flex:none;transform-origin:center center;
+  background:radial-gradient(1200px 800px at 70% 30%,var(--lapis-600) 0%,var(--lapis-800) 45%,var(--lapis-900) 100%)}
+.abs{position:absolute}
+.fill{position:absolute;inset:0}
+[data-a]{will-change:transform,opacity}
+
+/* ---------- پس‌زمینه ---------- */
+#pattern{opacity:.09}
+#particles{position:absolute;inset:0}
+#vignette{background:radial-gradient(ellipse at center,transparent 50%,rgba(2,6,20,.75) 100%);pointer-events:none}
+#noise{opacity:.05;mix-blend-mode:overlay;pointer-events:none}
+
+/* ---------- لوگو ---------- */
+.logo{position:relative;width:100%;height:100%;border-radius:28%;display:grid;place-items:center;
+  background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.03));
+  border:1.5px solid rgba(242,210,122,.55);
+  box-shadow:0 0 0 6px rgba(212,175,55,.08),0 20px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.25);
+  backdrop-filter:blur(8px)}
+.logo img{width:78%;height:78%;object-fit:contain;display:block}
+.logo .mono{font-weight:900;line-height:1;background:linear-gradient(160deg,var(--gold-100),var(--gold-500));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- اینترو ---------- */
+#intro .center{left:50%;top:50%;width:0;height:0}
+#introStar{left:-330px;top:-330px;width:660px;height:660px}
+#introLogo{left:-110px;top:-250px;width:220px;height:220px}
+#introLogo .mono{font-size:150px}
+#introTitle{left:-700px;width:1400px;top:20px;text-align:center;font-size:150px;font-weight:900;letter-spacing:-2px;
+  background:linear-gradient(180deg,#fff 30%,var(--gold-300));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.4))}
+#introLine{left:-260px;top:235px;width:520px;height:3px;background:linear-gradient(90deg,transparent,var(--gold-300),transparent);transform-origin:center}
+#introSub{left:-500px;width:1000px;top:260px;text-align:center;font-size:42px;font-weight:300;color:var(--muted);letter-spacing:2px}
+
+/* ---------- صحنه‌ی هر سایت ---------- */
+.scene{opacity:0}
+.num{right:150px;top:110px;font-size:260px;font-weight:900;line-height:1;color:transparent;-webkit-text-stroke:2px rgba(242,210,122,.35)}
+.sLogo{right:160px;top:330px;width:150px;height:150px}
+.sLogo .mono{font-size:100px}
+.sTitle{right:150px;top:490px;font-size:128px;font-weight:900;line-height:1.15;white-space:nowrap;
+  background:linear-gradient(180deg,#fff 40%,#cfd9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.col{right:160px;top:650px;width:800px;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.sDomain{font-size:46px;font-weight:600;direction:ltr;color:var(--gold-300);letter-spacing:1px}
+.sTag{font-size:40px;font-weight:300;line-height:1.5;color:var(--ink)}
+.chips{display:flex;gap:18px;margin-top:10px}
+.chip{padding:14px 30px;border-radius:999px;font-size:30px;font-weight:600;white-space:nowrap;
+  background:rgba(255,255,255,.06);border:1.5px solid var(--acc);color:#fff;
+  box-shadow:0 0 24px color-mix(in srgb,var(--acc) 35%,transparent)}
+.chip::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--acc);margin-left:12px;vertical-align:middle}
+
+.mock{left:130px;top:180px;width:840px;height:660px;border-radius:30px;overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,.03));
+  border:1.5px solid rgba(255,255,255,.18);
+  box-shadow:0 50px 120px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.25);
+  backdrop-filter:blur(14px)}
+.mock .bar{height:70px;display:flex;align-items:center;gap:14px;padding:0 26px;border-bottom:1px solid rgba(255,255,255,.1);direction:ltr}
+.mock .dot{width:16px;height:16px;border-radius:50%}
+.mock .url{flex:1;margin-left:18px;height:42px;border-radius:21px;background:rgba(0,0,0,.25);display:flex;align-items:center;padding:0 22px;
+  font-size:24px;color:#dfe6ff;font-weight:400;letter-spacing:.5px}
+.mock .url b{color:var(--gold-300);font-weight:600}
+.mock .caret{display:inline-block;width:2px;height:26px;background:var(--gold-300);margin-left:3px}
+.mock .lock{width:16px;height:16px;border:2px solid #9fe3b0;border-radius:3px;margin-right:12px}
+.mock .body{position:absolute;left:0;right:0;top:70px;bottom:0}
+.mock .ill{position:absolute;left:50%;top:40px;width:560px;height:380px;margin-left:-280px}
+.mock .sk{position:absolute;left:60px;right:60px;bottom:50px;display:flex;flex-direction:column;gap:16px;align-items:flex-end}
+.mock .sk i{display:block;height:18px;border-radius:9px;background:linear-gradient(90deg,rgba(255,255,255,.08),rgba(255,255,255,.22));transform-origin:right center}
+.mock .sk i.acc{background:linear-gradient(90deg,transparent,var(--acc));height:22px}
+.glow{left:50px;top:120px;width:1000px;height:820px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 35%,transparent),transparent);filter:blur(40px)}
+
+/* ---------- ترنزیشن ---------- */
+#band{top:-200px;left:0;width:520px;height:1480px;transform-origin:center;
+  background:linear-gradient(90deg,transparent,rgba(242,210,122,.0) 5%,var(--gold-300) 45%,var(--gold-500) 55%,rgba(212,175,55,0) 95%,transparent);
+  box-shadow:0 0 120px rgba(242,210,122,.6);mix-blend-mode:screen;opacity:.9}
+#band2{top:-200px;left:0;width:180px;height:1480px;background:var(--lapis-300);mix-blend-mode:screen;opacity:.35;filter:blur(6px)}
+
+/* ---------- اوتـرو ---------- */
+#outro .studio{left:50%;top:95px;width:150px;height:150px;margin-left:-75px}
+#outro .studio .mono{font-size:100px}
+#oTitle{left:0;right:0;top:270px;text-align:center;font-size:104px;font-weight:900;
+  background:linear-gradient(180deg,#fff 40%,var(--gold-300));-webkit-background-clip:text;background-clip:text;color:transparent}
+#oSub{left:0;right:0;top:405px;text-align:center;font-size:40px;font-weight:300;color:var(--muted)}
+#oLine{left:260px;top:610px;width:1400px;height:120px}
+.badge{top:520px;width:380px;text-align:center}
+.badge .logo{width:180px;height:180px;margin:0 auto}
+.badge .logo .mono{font-size:118px}
+.badge h3{margin-top:26px;font-size:46px;font-weight:800}
+.badge p{margin-top:4px;font-size:32px;font-weight:600;direction:ltr;color:var(--gold-300)}
+#cta{left:50%;top:900px;width:620px;margin-left:-310px;height:96px;border-radius:48px;display:grid;place-items:center;
+  font-size:40px;font-weight:800;color:var(--lapis-900);
+  background:linear-gradient(180deg,var(--gold-100),var(--gold-300) 40%,var(--gold-500));
+  box-shadow:0 18px 50px rgba(212,175,55,.45),inset 0 2px 0 rgba(255,255,255,.7)}
+#ctaRing{left:50%;top:900px;width:620px;margin-left:-310px;height:96px;border-radius:48px;border:2px solid var(--gold-300)}
+
+/* ---------- نوار پیشرفت سایت‌ها ---------- */
+#dots{left:50%;bottom:46px;margin-left:-60px;width:120px;display:flex;gap:16px;justify-content:center;direction:ltr}
+#dots i{display:block;width:12px;height:12px;border-radius:6px;background:rgba(255,255,255,.25)}
+#dots i.on{width:40px;background:var(--gold-300)}
+
+#cover{background:var(--lapis-900)}
+
+/* ---------- کنترل پیش‌نمایش ---------- */
+#ctl{position:fixed;left:16px;right:16px;bottom:14px;display:flex;gap:12px;align-items:center;direction:ltr;
+  font:14px system-ui;color:#cfd8ff;opacity:.25;transition:opacity .3s}
+#ctl:hover{opacity:1}
+#ctl button{background:#16245a;color:#fff;border:1px solid #2c3f86;border-radius:8px;padding:6px 14px;cursor:pointer}
+#ctl input{flex:1}
+body.export #ctl{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="stage">
+  <svg id="pattern" class="fill" data-a="pattern" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"></svg>
+  <canvas id="particles" width="1920" height="1080"></canvas>
+  <div id="noise" class="fill"></div>
+
+  <!-- INTRO -->
+  <section id="intro" class="fill" data-a="intro">
+    <div class="abs center">
+      <svg id="introStar" class="abs" viewBox="-330 -330 660 660" data-a="introStar"></svg>
+      <div id="introLogo" class="abs" data-a="introLogo"></div>
+      <div id="introTitle" class="abs" data-a="introTitle"></div>
+      <div id="introLine" class="abs" data-a="introLine"></div>
+      <div id="introSub" class="abs" data-a="introSub"></div>
+    </div>
+  </section>
+
+  <div id="scenes"></div>
+
+  <!-- OUTRO -->
+  <section id="outro" class="fill scene" data-a="outro">
+    <div class="abs studio" data-a="oLogo"></div>
+    <div id="oTitle" class="abs" data-a="oTitle"></div>
+    <div id="oSub" class="abs" data-a="oSub"></div>
+    <svg id="oLine" class="abs" viewBox="0 0 1400 120" fill="none">
+      <path data-a="oPath" pathLength="1" d="M200 60 C 450 -10, 500 130, 700 60 S 950 -10, 1200 60" stroke="url(#gl)" stroke-width="3" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <defs><linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#f2d27a" stop-opacity="0"/><stop offset=".5" stop-color="#f2d27a"/><stop offset="1" stop-color="#f2d27a" stop-opacity="0"/></linearGradient></defs>
+    </svg>
+    <div id="badges"></div>
+    <div id="ctaRing" class="abs" data-a="ctaRing"></div>
+    <div id="cta" class="abs" data-a="cta"></div>
+  </section>
+
+  <div id="band2" class="abs" data-a="band2"></div>
+  <div id="band" class="abs" data-a="band"></div>
+  <div id="dots" class="abs" data-a="dots"><i></i><i></i><i></i></div>
+  <div id="vignette" class="fill"></div>
+  <div id="cover" class="fill" data-a="cover"></div>
+</div></div>
+
+<div id="ctl"><button id="pp">⏸</button><input id="scrub" type="range" min="0" max="1000" value="0"><span id="tc">0.0s</span></div>
+
+<script>
+/* =====================================================================
+   CONFIG — همه‌ی متن‌ها و مسیر لوگوها از اینجا قابل ویرایش است.
+   لوگوها را در پوشه‌ی logos/ با همین نام‌ها بگذارید (PNG یا SVG شفاف).
+   اگر فایل پیدا نشود، یک مونوگرام طلایی جای آن نمایش داده می‌شود.
+   ===================================================================== */
+const CONFIG = {
+  studio: {
+    name: "رسا استودیو",
+    intro: "معرفی می‌کند",
+    logo: "logos/rasa-studio.png",
+    mono: "ر"
+  },
+  sites: [
+    {
+      title: "رسا تو",
+      domain: "rasa-to.ir",
+      tagline: "هر آنچه نیاز داری، ساده و سریع در دسترس تو",
+      chips: ["سریع", "ساده", "همیشه در دسترس"],
+      logo: "logos/rasa-to.png",
+      mono: "ت",
+      accent: "#5cc8ff",
+      art: "pin"
+    },
+    {
+      title: "رسا هوم",
+      domain: "rasa-home.ir",
+      tagline: "خانه‌ای که حال خوب را به زندگی‌ات برمی‌گرداند",
+      chips: ["طراحی", "دکوراسیون", "آرامش"],
+      logo: "logos/rasa-home.png",
+      mono: "خ",
+      accent: "#ffbf7a",
+      art: "home"
+    },
+    {
+      title: "رسا پرامپت",
+      domain: "rasa-promt.ir",
+      tagline: "پرامپت‌های حرفه‌ای برای بهترین نتیجه با هوش مصنوعی",
+      chips: ["هوش مصنوعی", "پرامپت آماده", "خلاقیت"],
+      logo: "logos/rasa-promt.png",
+      mono: "پ",
+      accent: "#b99bff",
+      art: "prompt",
+      promptText: "یک لوگوی مینیمال با رنگ لاجوردی و طلایی…"
+    }
+  ],
+  outro: {
+    title: "یک استودیو، سه دنیا",
+    sub: "طراحی و توسعه با امضای رسا استودیو",
+    cta: "همین حالا سر بزنید"
+  }
+};
+
+/* ======================= ابزارها ======================= */
+const $ = (s, r = document) => r.querySelector(s);
+const fa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  linear: p => p,
+  outCubic: p => 1 - Math.pow(1 - p, 3),
+  inCubic: p => p * p * p,
+  inOutCubic: p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2,
+  outExpo: p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p),
+  inOutExpo: p => p === 0 ? 0 : p === 1 ? 1 : p < .5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2,
+  outBack: p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); }
+};
+
+function logoHTML(src, mono) {
+  return `<div class="logo"><img src="${src}" alt=""><span class="mono" style="display:none">${mono}</span></div>`;
+}
+// اگر تصویر لوگو بارگذاری نشد، مونوگرام نمایش داده شود
+function wireLogos(root = document) {
+  root.querySelectorAll(".logo").forEach(l => {
+    const img = l.querySelector("img"), m = l.querySelector(".mono");
+    const fallback = () => { if (img) img.remove(); m.style.display = ""; };
+    if (!img) return fallback();
+    img.onerror = fallback;
+    if (img.complete && img.naturalWidth === 0) fallback();
+  });
+}
+
+/* ======================= ساخت صحنه‌ها ======================= */
+const ART = {
+  pin: acc => `
+    <svg class="ill" viewBox="0 0 560 380" fill="none">
+      ${[0,1,2].map(i => `<ellipse data-a="ring${i}" cx="280" cy="300" rx="200" ry="52" stroke="${acc}" stroke-width="2"/>`).join("")}
+      <path data-a="d0" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M280 300 C 280 300 190 205 190 145 a90 90 0 0 1 180 0 c0 60 -90 155 -90 155z" stroke="${acc}" stroke-width="6" stroke-linejoin="round"/>
+      <circle data-a="d1" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" cx="280" cy="145" r="34" stroke="#f2d27a" stroke-width="6"/>
+      <path data-a="d2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M40 330 C 140 250, 200 360, 280 300 S 450 230, 520 300" stroke="#f2d27a" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+    </svg>`,
+  home: acc => `
+    <svg class="ill" viewBox="0 0 560 380" fill="none">
+      <rect data-a="win" x="300" y="200" width="70" height="70" rx="6" fill="${acc}" opacity="0"/>
+      <path data-a="d0" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M110 175 L280 45 L450 175 M150 145 V340 H410 V145" stroke="${acc}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+      <path data-a="d1" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M190 340 V230 H250 V340 M300 200 H370 V270 H300 Z M335 200 V270 M300 235 H370" stroke="#f2d27a" stroke-width="5" stroke-linejoin="round"/>
+      <path data-a="d2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M60 340 H500 M380 90 V60 H410 V115" stroke="#f2d27a" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+    </svg>`,
+  prompt: (acc, s) => `
+    <div class="ill" style="direction:rtl">
+      <svg class="abs" style="inset:0" viewBox="0 0 560 380" fill="none">
+        <rect data-a="d0" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" x="30" y="215" width="500" height="90" rx="45" stroke="${acc}" stroke-width="4"/>
+        <path data-a="d1" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M80 260 l18 -18 l18 18 M98 242 V282" stroke="#f2d27a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        ${[[200,90,40],[300,50,24],[380,120,30],[140,150,18]].map(([x,y,r],i)=>`<g transform="translate(${x} ${y})"><path data-a="spark${i}" d="M0 ${-r} C ${r*.15} ${-r*.15} ${r*.15} ${-r*.15} ${r} 0 C ${r*.15} ${r*.15} ${r*.15} ${r*.15} 0 ${r} C ${-r*.15} ${r*.15} ${-r*.15} ${r*.15} ${-r} 0 C ${-r*.15} ${-r*.15} ${-r*.15} ${-r*.15} 0 ${-r}Z" fill="${i%2?'#f2d27a':acc}"/></g>`).join("")}
+      </svg>
+      <div data-a="ptext" style="position:absolute;right:70px;left:150px;top:238px;font-size:28px;color:#fff;white-space:nowrap;overflow:hidden"></div>
+    </div>`
+};
+
+const scenesEl = $("#scenes");
+CONFIG.sites.forEach((s, i) => {
+  const sec = document.createElement("section");
+  sec.className = "fill scene";
+  sec.dataset.a = `scene${i}`;
+  sec.style.setProperty("--acc", s.accent);
+  sec.innerHTML = `
+    <div class="abs glow" data-a="glow"></div>
+    <div class="abs num" data-a="num">${fa("0" + (i + 1))}</div>
+    <div class="abs sLogo" data-a="logo">${logoHTML(s.logo, s.mono)}</div>
+    <div class="abs sTitle" data-a="title">${s.title}</div>
+    <div class="abs col">
+      <div class="sDomain" data-a="domain">${s.domain}</div>
+      <div class="sTag" data-a="tag">${s.tagline}</div>
+      <div class="chips">${s.chips.map((c, k) => `<span class="chip" data-a="chip${k}">${c}</span>`).join("")}</div>
+    </div>
+    <div class="abs mock" data-a="mock">
+      <div class="bar">
+        <span class="dot" style="background:#ff6b6b"></span><span class="dot" style="background:#ffd166"></span><span class="dot" style="background:#4ade80"></span>
+        <div class="url"><span class="lock"></span><span data-a="url"></span><span class="caret" data-a="caret"></span></div>
+      </div>
+      <div class="body">
+        ${ART[s.art](s.accent, s)}
+        <div class="sk">
+          <i class="acc" data-a="sk0" style="width:46%"></i>
+          <i data-a="sk1" style="width:82%"></i>
+          <i data-a="sk2" style="width:64%"></i>
+        </div>
+      </div>
+    </div>`;
+  scenesEl.appendChild(sec);
+});
+
+// اینترو و اوترو
+$("#introLogo").innerHTML = logoHTML(CONFIG.studio.logo, CONFIG.studio.mono);
+$("#introTitle").textContent = CONFIG.studio.name;
+$("#introSub").textContent = CONFIG.studio.intro;
+$("[data-a=oLogo]").innerHTML = logoHTML(CONFIG.studio.logo, CONFIG.studio.mono);
+$("#oTitle").textContent = CONFIG.outro.title;
+$("#oSub").textContent = CONFIG.outro.sub;
+$("#cta").textContent = CONFIG.outro.cta;
+$("#badges").innerHTML = CONFIG.sites.map((s, i) => `
+  <div class="abs badge" data-a="badge${i}" style="right:${180 + i * 590}px">
+    ${logoHTML(s.logo, s.mono)}<h3>${s.title}</h3><p>${s.domain}</p>
+  </div>`).join("");
+wireLogos();
+
+/* ------ ستاره‌ی هشت‌پر (گره‌ی ایرانی) ------ */
+function starPath(cx, cy, R, r, n = 8) {
+  let d = "";
+  for (let k = 0; k < n * 2; k++) {
+    const a = Math.PI * k / n - Math.PI / 2, rr = k % 2 ? r : R;
+    d += (k ? "L" : "M") + (cx + rr * Math.cos(a)).toFixed(1) + " " + (cy + rr * Math.sin(a)).toFixed(1);
+  }
+  return d + "Z";
+}
+(function buildPattern() {
+  let g = "";
+  for (let y = -1; y < 9; y++) for (let x = -1; x < 15; x++) {
+    const cx = x * 150 + (y % 2 ? 75 : 0), cy = y * 130;
+    g += `<path d="${starPath(cx, cy, 60, 34)}"/><circle cx="${cx}" cy="${cy}" r="14"/>`;
+  }
+  $("#pattern").innerHTML = `<g fill="none" stroke="#f2d27a" stroke-width="1.4">${g}</g>`;
+})();
+$("#introStar").innerHTML = `
+  <defs><radialGradient id="sg"><stop offset="0" stop-color="#f2d27a" stop-opacity=".25"/><stop offset="1" stop-color="#f2d27a" stop-opacity="0"/></radialGradient></defs>
+  <circle r="320" fill="url(#sg)" data-a="starGlow"/>
+  <circle data-a="st0" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" r="300" fill="none" stroke="#f2d27a" stroke-width="1.5" opacity=".6"/>
+  <path data-a="st1" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="${starPath(0, 0, 290, 200)}" fill="none" stroke="#f2d27a" stroke-width="2.5"/>
+  <path data-a="st2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="${starPath(0, 0, 240, 150, 16)}" fill="none" stroke="#7d9cf0" stroke-width="1.5" opacity=".8"/>
+  <circle data-a="st3" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" r="170" fill="none" stroke="#f2d27a" stroke-width="1" opacity=".5"/>`;
+
+/* ======================= موتور تایم‌لاین ======================= */
+const tracks = new Map();   // el -> {prop: [track...]}
+const fxs = [];             // توابع وابسته به زمان
+function A(sel, root) {
+  if (sel instanceof Element) return [sel];
+  return [...(root || document).querySelectorAll(`[data-a="${sel}"]`)];
+}
+function tw(sel, start, dur, props, ease = "outCubic", root) {
+  for (const el of A(sel, root)) {
+    if (!tracks.has(el)) tracks.set(el, {});
+    const m = tracks.get(el);
+    for (const [k, [from, to]] of Object.entries(props)) {
+      (m[k] ||= []).push({ start, dur, from, to, ease: E[ease] });
+      m[k].sort((a, b) => a.start - b.start);
+    }
+  }
+}
+const fx = fn => fxs.push(fn);
+function valueAt(list, t) {
+  let v = list[0].from;
+  for (const tr of list) {
+    if (t < tr.start) break;
+    v = lerp(tr.from, tr.to, tr.ease(clamp((t - tr.start) / (tr.dur || 1e-6))));
+  }
+  return v;
+}
+function render(t) {
+  for (const [el, m] of tracks) {
+    const v = {};
+    for (const k in m) v[k] = valueAt(m[k], t);
+    const tf = [];
+    if ("x" in v || "y" in v) tf.push(`translate(${v.x || 0}px,${v.y || 0}px)`);
+    if ("s" in v) tf.push(`scale(${v.s})`);
+    if ("sx" in v) tf.push(`scaleX(${v.sx})`);
+    if ("r" in v) tf.push(`rotate(${v.r}deg)`);
+    if ("skew" in v) tf.push(`skewX(${v.skew}deg)`);
+    if (tf.length) {
+      if (el instanceof SVGElement && !(el instanceof SVGSVGElement)) {
+        el.style.transformBox = "fill-box"; el.style.transformOrigin = "center";
+      }
+      el.style.transform = tf.join(" ");
+    }
+    if ("o" in v) el.style.opacity = v.o;
+    if ("blur" in v) el.style.filter = v.blur > .05 ? `blur(${v.blur}px)` : "none";
+    if ("clip" in v) el.style.clipPath = `inset(-20% -5% -20% ${v.clip}%)`;
+    if ("dash" in v) el.style.strokeDashoffset = 1 - v.dash;
+  }
+  for (const f of fxs) f(t);
+}
+
+/* ======================= کارگردانی ======================= */
+const DUR = 32;
+const SCENE_LEN = 6.5, S0 = 5;
+const OUT = S0 + SCENE_LEN * CONFIG.sites.length; // 24.5
+
+// پوشش ابتدا و انتها (برای لوپ نرم)
+tw("cover", 0, 1.0, { o: [1, 0] }, "inOutCubic");
+tw("cover", DUR - .8, .8, { o: [0, 1] }, "inOutCubic");
+
+// الگوی پس‌زمینه: چرخش و بزرگ‌نمایی آرام
+tw("pattern", 0, DUR, { r: [0, 8], s: [1.15, 1.3] }, "linear");
+
+// ----- INTRO -----
+tw("st0", .2, 1.6, { dash: [0, 1] }, "inOutCubic");
+tw("st1", .4, 1.8, { dash: [0, 1] }, "inOutCubic");
+tw("st2", .7, 1.8, { dash: [0, 1] }, "inOutCubic");
+tw("st3", 1.0, 1.4, { dash: [0, 1] }, "inOutCubic");
+tw("starGlow", .5, 2, { o: [0, 1], s: [.6, 1] });
+tw("introStar", 0, 5, { r: [-25, 20], s: [.85, 1.05] }, "linear");
+tw("introLogo", 1.2, 1.0, { o: [0, 1], s: [.4, 1], r: [-30, 0] }, "outBack");
+tw("introTitle", 1.9, 1.0, { clip: [100, 0], y: [20, 0] }, "inOutCubic");
+tw("introLine", 2.5, .9, { sx: [0, 1] }, "inOutExpo");
+tw("introSub", 2.7, .8, { o: [0, 1], y: [24, 0] });
+tw("intro", 4.3, .8, { o: [1, 0], s: [1, 1.12], blur: [0, 14] }, "inCubic");
+
+// ----- صحنه‌های سایت -----
+CONFIG.sites.forEach((site, i) => {
+  const S = S0 + i * SCENE_LEN;
+  const root = A(`scene${i}`)[0];
+  const q = (sel, start, dur, props, ease) => tw(sel, start, dur, props, ease, root);
+
+  tw(root, S - .15, .5, { o: [0, 1] }, "linear");
+  tw(root, S + SCENE_LEN - .55, .55, { o: [1, 0], blur: [0, 8], s: [1, .97] }, "inCubic");
+
+  q("glow", S, 1.5, { o: [0, 1], s: [.6, 1] });
+  q("num", S + .05, 1.0, { o: [0, 1], x: [-120, 0] }, "outExpo");
+  q("logo", S + .2, .9, { o: [0, 1], s: [.3, 1], r: [25, 0] }, "outBack");
+  q("title", S + .45, .9, { clip: [100, 0] }, "inOutCubic");
+  q("domain", S + .85, .7, { o: [0, 1], y: [20, 0] });
+  q("tag", S + 1.05, 1.0, { clip: [100, 0] }, "inOutCubic");
+  site.chips.forEach((_, k) => q(`chip${k}`, S + 1.6 + k * .16, .6, { o: [0, 1], s: [.5, 1], y: [20, 0] }, "outBack"));
+
+  q("mock", S + .25, 1.2, { o: [0, 1], x: [-160, 0], r: [-4, 0], s: [.92, 1] }, "outExpo");
+  q("sk0", S + 2.0, .8, { sx: [0, 1] }, "outExpo");
+  q("sk1", S + 2.15, .8, { sx: [0, 1] }, "outExpo");
+  q("sk2", S + 2.3, .8, { sx: [0, 1] }, "outExpo");
+  q("d0", S + 1.2, 1.6, { dash: [0, 1] }, "inOutCubic");
+  q("d1", S + 1.7, 1.3, { dash: [0, 1] }, "inOutCubic");
+  q("d2", S + 2.1, 1.4, { dash: [0, 1] }, "inOutCubic");
+
+  // تایپ آدرس سایت
+  const url = A("url", root)[0], caret = A("caret", root)[0];
+  const full = "https://" + site.domain;
+  fx(t => {
+    const p = clamp((t - (S + .9)) / 1.0);
+    const n = Math.round(full.length * p);
+    const txt = full.slice(0, n);
+    url.innerHTML = txt.replace(site.domain, `<b>${site.domain}</b>`);
+    caret.style.opacity = (t > S + 2.2 ? (Math.floor(t * 2.2) % 2) : 1);
+  });
+
+  // شناور شدن ملایم موکاپ
+  const mock = A("mock", root)[0];
+  fx(t => { mock.style.translate = `0 ${Math.sin((t - S) * 1.3) * 8}px`; });
+
+  // انیمیشن ویژه‌ی هر طرح
+  if (site.art === "pin") {
+    [0, 1, 2].forEach(k => {
+      const el = A(`ring${k}`, root)[0];
+      fx(t => {
+        const p = ((t - S - 1.5 - k * .6) / 1.8);
+        if (p < 0) { el.style.opacity = 0; return; }
+        const f = p % 1;
+        el.style.transformBox = "fill-box"; el.style.transformOrigin = "center";
+        el.style.transform = `scale(${.2 + f * .9})`;
+        el.style.opacity = (1 - f) * .8;
+      });
+    });
+  }
+  if (site.art === "home") {
+    q("win", S + 2.6, .8, { o: [0, .55] });
+    const w = A("win", root)[0];
+    fx(t => { if (t > S + 3.4) w.style.opacity = .45 + Math.sin(t * 3) * .12; });
+  }
+  if (site.art === "prompt") {
+    const pt = A("ptext", root)[0];
+    const chars = [...site.promptText];
+    fx(t => {
+      const p = clamp((t - (S + 2.0)) / 2.0);
+      pt.textContent = chars.slice(0, Math.round(chars.length * p)).join("") + (p < 1 || Math.floor(t * 2.2) % 2 ? "|" : " ");
+    });
+    [0, 1, 2, 3].forEach(k => {
+      q(`spark${k}`, S + 1.4 + k * .2, .7, { s: [0, 1], o: [0, 1] }, "outBack");
+      const el = A(`spark${k}`, root)[0];
+      fx(t => { if (t > S + 2.3) el.style.rotate = `${Math.sin(t * 2 + k) * 12}deg`; });
+    });
+  }
+});
+
+// نشانگر صحنه
+const dots = [...$("#dots").children];
+tw("dots", S0, .6, { o: [0, 1], y: [20, 0] });
+tw("dots", OUT - .3, .5, { o: [1, 0] });
+fx(t => dots.forEach((d, i) => d.classList.toggle("on", Math.floor((t - S0) / SCENE_LEN) === i)));
+
+// ترنزیشن نوار طلایی بین صحنه‌ها
+[S0 - .5, S0 + SCENE_LEN - .5, S0 + 2 * SCENE_LEN - .5, OUT - .5].forEach(b => {
+  tw("band", b, .95, { x: [2300, -900], skew: [-18, -18] }, "inOutCubic");
+  tw("band2", b + .08, .95, { x: [2300, -700], skew: [-18, -18] }, "inOutCubic");
+});
+
+// ----- OUTRO -----
+tw("outro", OUT - .15, .5, { o: [0, 1] }, "linear");
+tw("oLogo", OUT + .1, .9, { o: [0, 1], s: [.3, 1], r: [-25, 0] }, "outBack");
+tw("oTitle", OUT + .5, 1.0, { clip: [100, 0] }, "inOutCubic");
+tw("oSub", OUT + 1.0, .8, { o: [0, 1], y: [20, 0] });
+CONFIG.sites.forEach((_, i) => tw(`badge${i}`, OUT + 1.2 + i * .2, .9, { o: [0, 1], y: [120, 0], s: [.7, 1] }, "outBack"));
+tw("oPath", OUT + 1.8, 1.4, { dash: [0, 1] }, "inOutCubic");
+tw("cta", OUT + 2.6, .8, { o: [0, 1], s: [.6, 1] }, "outBack");
+const ring = $("#ctaRing");
+fx(t => {
+  const p = (t - OUT - 3.2) / 1.4;
+  if (p < 0) { ring.style.opacity = 0; return; }
+  const f = p % 1;
+  ring.style.opacity = (1 - f) * .8;
+  ring.style.transform = `scale(${1 + f * .18},${1 + f * .6})`;
+});
+CONFIG.sites.forEach((_, i) => {
+  const b = A(`badge${i}`)[0];
+  fx(t => { b.style.translate = `0 ${Math.sin(t * 1.6 + i * 1.2) * 7}px`; });
+});
+
+// ----- ذرات طلایی (قطعی، قابل جابه‌جایی در زمان) -----
+const cv = $("#particles"), cx = cv.getContext("2d");
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const P = Array.from({ length: 110 }, () => ({
+  x: rnd() * 1920, y: rnd() * 1080, r: .6 + rnd() * 2.6, vy: 6 + rnd() * 22, vx: -6 + rnd() * 12,
+  ph: rnd() * 6.28, gold: rnd() > .3
+}));
+fx(t => {
+  cx.clearRect(0, 0, 1920, 1080);
+  for (const p of P) {
+    const y = ((p.y - p.vy * t) % 1140 + 1140) % 1140 - 30;
+    const x = ((p.x + p.vx * t + Math.sin(t * .6 + p.ph) * 20) % 1920 + 1920) % 1920;
+    const a = .25 + .55 * (.5 + .5 * Math.sin(t * 2 + p.ph));
+    cx.beginPath();
+    cx.fillStyle = p.gold ? `rgba(242,210,122,${a})` : `rgba(160,190,255,${a * .7})`;
+    cx.shadowColor = p.gold ? "rgba(242,210,122,.9)" : "rgba(125,156,240,.9)";
+    cx.shadowBlur = p.r * 5;
+    cx.arc(x, y, p.r, 0, 6.283);
+    cx.fill();
+  }
+});
+
+/* ======================= پخش / خروجی ======================= */
+const stage = $("#stage");
+const EXPORT = new URLSearchParams(location.search).has("export");
+if (EXPORT) document.body.classList.add("export");
+function fit() {
+  const s = EXPORT ? 1 : Math.min(innerWidth / 1920, innerHeight / 1080);
+  stage.style.transform = `scale(${s})`;
+}
+addEventListener("resize", fit); fit();
+
+window.DURATION = DUR;
+window.__render = t => render(t);
+
+let playing = !EXPORT, base = performance.now(), cur = 0;
+const scrub = $("#scrub"), tc = $("#tc"), pp = $("#pp");
+function loop(now) {
+  if (playing) cur = ((now - base) / 1000) % DUR;
+  render(cur);
+  scrub.value = cur / DUR * 1000;
+  tc.textContent = cur.toFixed(1) + "s";
+  requestAnimationFrame(loop);
+}
+function toggle() { playing = !playing; base = performance.now() - cur * 1000; pp.textContent = playing ? "⏸" : "▶"; }
+pp.onclick = toggle;
+addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); toggle(); } });
+scrub.oninput = () => { cur = scrub.value / 1000 * DUR; base = performance.now() - cur * 1000; };
+
+document.fonts.ready.then(() => {
+  if (EXPORT) { render(0); window.__ready = true; }
+  else requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
